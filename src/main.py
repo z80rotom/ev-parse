@@ -1,12 +1,27 @@
 import os
+import struct
 from argparse import ArgumentParser
 
 import UnityPy
 
 from ev_cmd import EvCmdType
 
-ROOT_DIR = r"C:\Users\mhenderson\AppData\Roaming\yuzu\dump\0100000011D90000\romfs\StreamingAssets\AssetAssistant"
-EV_SCRIPT = r"Dpr\ev_script"
+def decode_int(var):
+    # Thanks Aldo796
+    var = int(var)
+    data = float(struct.unpack('!f', struct.pack('!I', var & 0xFFFFFFFF))[0])
+    return data
+
+def add_tamago(args):
+    monsNo = int(decode_int(args[0]["data"]))
+    placeNo = int(decode_int(args[1]["data"]))
+    args[0]["data"] = monsNo
+    args[1]["data"] = placeNo
+    return args
+
+EV_CMD_TYPE_MAP = {
+    EvCmdType._ADD_TAMAGO: add_tamago
+}
 
 def parse_ev_script(tree, name=None):
     if "Scripts" not in tree:
@@ -26,9 +41,14 @@ def parse_ev_script(tree, name=None):
             arg = args[0]
             evCmd = EvCmdType(arg["data"])
             
+            if evCmd in EV_CMD_TYPE_MAP:
+                args = EV_CMD_TYPE_MAP[evCmd](args[1:])
+            else:
+                args = args[1:]
+
             compiledCommands.append("{}({})".format(
                 evCmd.name,
-                ", ".join([str(arg["data"]) for arg in args[1:]])
+                ", ".join([str(arg["data"]) for arg in args])
             ))
         compiledScripts[label] = compiledCommands
     return compiledScripts
