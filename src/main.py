@@ -65,7 +65,8 @@ def parse_ev_script(tree, name=None):
                 if arg["argType"] == 5:
                     strIdx = arg["data"]
                     strVal = strList[strIdx]
-                    argData.append('"{}"'.format(strVal))
+                    argData.append("'{}'".format(strVal))
+                    continue
                 if arg["argType"] not in range(0, 6):
                     print(arg["argType"])
                 argData.append(arg["data"])
