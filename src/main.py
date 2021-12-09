@@ -29,6 +29,8 @@ def parse_ev_script(tree, name=None):
         return
     
     compiledScripts = {}
+    strList = tree["StrList"]
+    strList = [it.encode("ascii", "ignore").decode() for it in strList]
     scripts = tree["Scripts"]
     for script in scripts:
         label = script["Label"]
@@ -46,9 +48,30 @@ def parse_ev_script(tree, name=None):
             else:
                 args = args[1:]
 
+            argData = []
+            for arg in args:
+                if arg["argType"] == 2:
+                    # Work
+                    argData.append("@{}".format(arg["data"]))
+                    continue
+                if arg["argType"] == 3:
+                    # Flag
+                    argData.append("#{}".format(arg["data"]))
+                    continue
+                if arg["argType"] == 4:
+                    # Sys Flag
+                    argData.append("${}".format(arg["data"]))
+                    continue                
+                if arg["argType"] == 5:
+                    strIdx = arg["data"]
+                    strVal = strList[strIdx]
+                    argData.append('"{}"'.format(strVal))
+                if arg["argType"] not in range(0, 6):
+                    print(arg["argType"])
+                argData.append(arg["data"])
             compiledCommands.append("{}({})".format(
                 evCmd.name,
-                ", ".join([str(arg["data"]) for arg in args])
+                ", ".join([str(arg) for arg in argData])
             ))
         compiledScripts[label] = compiledCommands
     return compiledScripts
