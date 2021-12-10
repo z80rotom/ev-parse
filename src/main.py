@@ -41,8 +41,6 @@ def parse_ev_script(tree, name=None):
                     argVal = decode_int(arg["data"])
                     if int(argVal) == argVal:
                         argVal = int(argVal)
-                    if argVal < 0:
-                        print("", argVal)
                     argData.append(str(argVal))
                     continue
                 if arg["argType"] == EvArgType.Work:
