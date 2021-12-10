@@ -5,23 +5,13 @@ from argparse import ArgumentParser
 import UnityPy
 
 from ev_cmd import EvCmdType
+from ev_argtype import EvArgType
 
 def decode_int(var):
     # Thanks Aldo796
     var = int(var)
     data = float(struct.unpack('!f', struct.pack('!I', var & 0xFFFFFFFF))[0])
     return data
-
-def add_tamago(args):
-    monsNo = int(decode_int(args[0]["data"]))
-    placeNo = int(decode_int(args[1]["data"]))
-    args[0]["data"] = monsNo
-    args[1]["data"] = placeNo
-    return args
-
-EV_CMD_TYPE_MAP = {
-    EvCmdType._ADD_TAMAGO: add_tamago
-}
 
 def parse_ev_script(tree, name=None):
     if "Scripts" not in tree:
@@ -43,32 +33,35 @@ def parse_ev_script(tree, name=None):
             arg = args[0]
             evCmd = EvCmdType(arg["data"])
             
-            if evCmd in EV_CMD_TYPE_MAP:
-                args = EV_CMD_TYPE_MAP[evCmd](args[1:])
-            else:
-                args = args[1:]
+            args = args[1:]
 
             argData = []
             for arg in args:
-                if arg["argType"] == 2:
+                if arg["argType"] == EvArgType.Value:
+                    argVal = decode_int(arg["data"])
+                    if int(argVal) == argVal:
+                        argVal = int(argVal)
+                    if argVal < 0:
+                        print("", argVal)
+                    argData.append(str(argVal))
+                    continue
+                if arg["argType"] == EvArgType.Work:
                     # Work
                     argData.append("@{}".format(arg["data"]))
                     continue
-                if arg["argType"] == 3:
+                if arg["argType"] == EvArgType.Flag:
                     # Flag
                     argData.append("#{}".format(arg["data"]))
                     continue
-                if arg["argType"] == 4:
+                if arg["argType"] == EvArgType.SysFlag:
                     # Sys Flag
                     argData.append("${}".format(arg["data"]))
                     continue                
-                if arg["argType"] == 5:
+                if arg["argType"] == EvArgType.String:
                     strIdx = arg["data"]
                     strVal = strList[strIdx]
                     argData.append("'{}'".format(strVal))
                     continue
-                if arg["argType"] not in range(0, 6):
-                    print(arg["argType"])
                 argData.append(arg["data"])
             compiledCommands.append("{}({})".format(
                 evCmd.name,
