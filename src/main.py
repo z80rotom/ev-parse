@@ -40,7 +40,10 @@ def parse_ev_script(tree, name=None):
                 if arg["argType"] == EvArgType.Value:
                     argVal = decode_int(arg["data"])
                     if int(argVal) == argVal:
-                        argVal = int(argVal)
+                        argVal = str(int(argVal))
+                    else:
+                        argVal = "{:03f}".format(argVal)
+                    argData.append(argVal)
                     argData.append(str(argVal))
                     continue
                 if arg["argType"] == EvArgType.Work:
