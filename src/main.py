@@ -44,7 +44,6 @@ def parse_ev_script(tree, name=None):
                     else:
                         argVal = "{:03f}".format(argVal)
                     argData.append(argVal)
-                    argData.append(str(argVal))
                     continue
                 if arg["argType"] == EvArgType.Work:
                     # Work
