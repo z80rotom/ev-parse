@@ -1,3 +1,6 @@
+# Project Archived
+Archived this repo because it's better to just include it as part of https://github.com/z80rotom/ev-as
+
 # ev-parse
 Parser for EvScripts from Pokemon BDSP
 
